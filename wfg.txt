@@ -1,0 +1,78 @@
+#include <stdio.h> #include <stdlib.h> #include <stdbool.h>
+// Define the maximum number of vertices in the graph #define MAX_VERTICES 100
+// Graph structure typedef struct {
+int V;
+int **adjacency_matrix;
+} Graph;
+// Function to create a graph with V vertices Graph* createGraph(int V) {
+Graph *graph = (Graph*)malloc(sizeof(Graph)); graph->V = V;
+graph->adjacency_matrix = (int**)malloc(V * sizeof(int*)); for (int i = 0; i < V; i++) {
+graph->adjacency_matrix[i] = (int*)calloc(V, sizeof(int));
+}
+ 
+return graph;
+}
+// Function to add an edge to the graph
+void addEdge(Graph *graph, int src, int dest) { graph->adjacency_matrix[src][dest] = 1;
+}
+// Utility function for finding cycles in the graph
+bool findCycleUtil(Graph *graph, int v, bool visited[], bool *recStack) { if (!visited[v]) {
+visited[v] = true; recStack[v] = true;
+for (int i = 0; i < graph->V; i++) {
+if (graph->adjacency_matrix[v][i] && !visited[i] && findCycleUtil(graph, i, visited, recStack)) {
+return true;
+} else if (recStack[i]) { return true;
+}
+}
+}
+recStack[v] = false; return false;
+}
+// Function to check if the graph contains a cycle bool findCycle(Graph *graph) {
+bool *visited = (bool*)calloc(graph->V, sizeof(bool)); bool *recStack = (bool*)calloc(graph->V, sizeof(bool)); for (int i = 0; i < graph->V; i++) {
+if (findCycleUtil(graph, i, visited, recStack)) { free(visited);
+free(recStack); return true;
+}
+}
+free(visited); free(recStack); return false;
+}
+// Function to print the adjacency matrix of the graph void displayGraph(Graph *graph) {
+for (int i = 0; i < graph->V; i++) { printf("%d -> ", i);
+for (int j = 0; j < graph->V; j++) {
+if (graph->adjacency_matrix[i][j]) {
+ 
+printf("%d ", j);
+}
+}
+printf("\n");
+}}
+int main() { int V = 4;
+Graph *g = createGraph(V); int sites = 2;
+for (int i = 0; i < sites; i++) { int links;
+printf("Enter number of links in site %d: ", i + 1); scanf("%d", &links);
+for (int j = 0; j < links; j++) { int src, dest;
+printf("Enter source in link %d: ", j + 1); scanf("%d", &src);
+printf("Enter destination in link %d: ", j + 1); scanf("%d", &dest);
+addEdge(g, src, dest);
+}
+}
+displayGraph(g); if (findCycle(g)) {
+printf("Cycle Exists, Deadlock\n");
+} else {
+printf("No Cycle Exists, No Deadlock\n");
+}// Free the allocated memory for (int i = 0; i < V; i++) {
+free(g->adjacency_matrix[i]);
+}
+free(g->adjacency_matrix); free(g);
+return 0;
+}
+
+
+
+2
+1
+2
+2
+3
+1
+3
+2
